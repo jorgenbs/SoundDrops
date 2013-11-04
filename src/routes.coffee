@@ -1,2 +1,2 @@
 exports.index = (req,res) ->
-  res.render 'index', { title: 'express' }
+  res.render 'index', { title: 'heyhey' }

@@ -19,14 +19,22 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      all: {
+      src: {
         files: ['<%= coffeelint.all %>'],
         tasks: ['default']
+      },
+      www: {
+        files: ['public/**/*.jade', 'public/**/*.css', 'public/**/*.js'],
+        options: {
+          livereload: {
+            port: 1337
+          }
+        }
       }
     },
     concurrent: {
       dev: {
-        tasks: ['nodemon', 'watch'],
+        tasks: ['nodemon','watch'],
         options: {
           logConcurrentOutput: true
         }
@@ -36,7 +44,8 @@ module.exports = function(grunt) {
       compile: {
         files: {
           'app.js': 'src/app.coffee',
-          'routes.js': 'src/routes.coffee'
+          'routes.js': 'src/routes.coffee',
+          'public/js/sound-drop.js': 'src/sound-drop.coffee'
         }
       }
     },
@@ -53,8 +62,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-concurrent');
   grunt.loadNpmTasks('grunt-nodemon');
+  grunt.loadNpmTasks('grunt-reload');
 
   // Default task.
   grunt.registerTask('default', ['coffeelint', 'coffee', 'mochaTest']);
   grunt.registerTask('test', ['mochaTest']);
+  grunt.registerTask('dev', ['default', 'concurrent']);
+
 };

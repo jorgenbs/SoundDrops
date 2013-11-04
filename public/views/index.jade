@@ -2,8 +2,14 @@
 html
   head
     link(rel='stylesheet' href='css/site.css')
+    script(src='http://localhost:1337/livereload.js')
   body
-    h1.target hello there
+    div.box
+        h1.target hello there!
 
     script(src='js/lib/jquery.min.js')
     script(src='js/lib/jgravity.min.js')
+    script(src='js/lib/soundcloud-widget-api.min.js')
+    script(src='js/sound-drop.js')
+    script(type='text/javascript')
+        new SoundDrop('.box')
