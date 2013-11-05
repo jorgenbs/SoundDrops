@@ -20,6 +20,8 @@
     "grunt-concurrent": "~0.4.1",
     "grunt-nodemon": "~0.1.1",
     "grunt-reload": "~0.2.0",
-    "socket.io": "~0.9.16"
+    "socket.io": "~0.9.16",
+    "chai": "~1.8.1",
+    "mocha": "~1.14.0"
   }
 }
