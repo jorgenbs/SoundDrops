@@ -10,30 +10,35 @@ class SoundDrop
         @add data.widget_code, false
 
   add: (widget_code, emit) ->
-    widget = @_addToDOM(widget_code)
-    
-    
-    $(@box).jGravity(
-      target: '.target:last-child'
-    )
-
     if emit
       @socket.emit 'new_drop',
         widget_code: widget_code
 
-  _addToDOM: (widget_code) ->
-    widget = $(widget_code)
-    widget.attr('width', '350px')
-    widget.attr('height', '100px')
-    widget.attr('class', 'target')
-    widget.css('position', 'absolute')
-    widget.css('left', @_randx())
-    return $(@box).append(widget)
+    widget = @_addIframe(widget_code)
+    widget_api = SC.Widget(widget[0])
+    widget.hide()
 
-  _randx: () ->
+    @_addReplacementWidget(widget[0])
+
+  _addIframe: (widget_code) ->
+    widget = $(widget_code)
+    $(@box).append(widget)
+    return widget
+
+  _addReplacementWidget: (widget) ->
+    circle = $("<div class='circle'></div>")
+    $(@box).append(circle)
+    circle.css('position', 'absolute')
+    circle.css('left', @_randx(circle))
+    circle.jGravity()
+    circle.click (e) ->
+      e.stopPropagation()
+      SC.Widget(widget).toggle()
+
+  _randx: (el) ->
     #random x-position
     box_width = $(@box).width()
-    rand_x = Math.random() * (box_width - 350)
+    rand_x = Math.random() * (box_width - el.width())
     shift_left = $('body').width() * 0.2
 
     xpos = Math.floor rand_x + shift_left

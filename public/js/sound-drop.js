@@ -20,33 +20,42 @@
     }
 
     SoundDrop.prototype.add = function(widget_code, emit) {
-      var widget;
-      widget = this._addToDOM(widget_code);
-      $(this.box).jGravity({
-        target: '.target:last-child'
-      });
+      var widget, widget_api;
       if (emit) {
-        return this.socket.emit('new_drop', {
+        this.socket.emit('new_drop', {
           widget_code: widget_code
         });
       }
+      widget = this._addIframe(widget_code);
+      widget_api = SC.Widget(widget[0]);
+      widget.hide();
+      return this._addReplacementWidget(widget[0]);
     };
 
-    SoundDrop.prototype._addToDOM = function(widget_code) {
+    SoundDrop.prototype._addIframe = function(widget_code) {
       var widget;
       widget = $(widget_code);
-      widget.attr('width', '350px');
-      widget.attr('height', '100px');
-      widget.attr('class', 'target');
-      widget.css('position', 'absolute');
-      widget.css('left', this._randx());
-      return $(this.box).append(widget);
+      $(this.box).append(widget);
+      return widget;
     };
 
-    SoundDrop.prototype._randx = function() {
+    SoundDrop.prototype._addReplacementWidget = function(widget) {
+      var circle;
+      circle = $("<div class='circle'></div>");
+      $(this.box).append(circle);
+      circle.css('position', 'absolute');
+      circle.css('left', this._randx(circle));
+      circle.jGravity();
+      return circle.click(function(e) {
+        e.stopPropagation();
+        return SC.Widget(widget).toggle();
+      });
+    };
+
+    SoundDrop.prototype._randx = function(el) {
       var box_width, rand_x, shift_left, xpos;
       box_width = $(this.box).width();
-      rand_x = Math.random() * (box_width - 350);
+      rand_x = Math.random() * (box_width - el.width());
       shift_left = $('body').width() * 0.2;
       xpos = Math.floor(rand_x + shift_left);
       return xpos;

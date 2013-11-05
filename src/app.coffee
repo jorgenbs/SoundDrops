@@ -26,9 +26,8 @@ server.listen '8080', () ->
 #setup websocket
 io = socket.listen server
 
-console.log room
-
 io.sockets.on 'connection', (socket) ->
   socket.join room
+  console.log 'JOINED ' + room
   socket.on 'new_drop', (data) ->
     socket.broadcast.to(room).emit 'new_drop', data

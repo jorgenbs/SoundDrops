@@ -40,10 +40,9 @@
 
   io = socket.listen(server);
 
-  console.log(room);
-
   io.sockets.on('connection', function(socket) {
     socket.join(room);
+    console.log('JOINED ' + room);
     return socket.on('new_drop', function(data) {
       return socket.broadcast.to(room).emit('new_drop', data);
     });
