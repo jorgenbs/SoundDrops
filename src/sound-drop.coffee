@@ -1,15 +1,25 @@
 class SoundDrop
   constructor: (@box) ->
-    $(@box).jGravity()
+    self = this
+    $(@box).click ->
+      widget_code = window.prompt 'pase widget code'
+      self.add(widget_code)
 
-  add: (url) ->
-    widget = $("""
-      <iframe width='100%' height='450' scrolling='no' ---
-      frameborder='no' src='https://w.soundcloud.com/player/---
-      ?url='" + url +"></iframe>
-      """)
-    widget.attr('src', widget.attr('src') + url)
+  add: (widget_code) ->
+    widget = $(widget_code)
+    widget.attr('width', '350px')
+    widget.attr('height', '100px')
+    widget.attr('class', 'target')
+
+    #random x-position
+    xpos = Math.floor Math.random() * $('body').width() - 350
+
+    widget.css('position', 'absolute')
+    widget.css('left', xpos)
 
     $(@box).append(widget)
+    $(@box).jGravity(
+      target: '.target:last-child'
+    )
 
 this.SoundDrop = SoundDrop

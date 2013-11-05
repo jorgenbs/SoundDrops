@@ -3,15 +3,29 @@
 
   SoundDrop = (function() {
     function SoundDrop(box) {
+      var self;
       this.box = box;
-      $(this.box).jGravity();
+      self = this;
+      $(this.box).click(function() {
+        var widget_code;
+        widget_code = window.prompt('pase widget code');
+        return self.add(widget_code);
+      });
     }
 
-    SoundDrop.prototype.add = function(url) {
-      var widget;
-      widget = $("<iframe width='100%' height='450' scrolling='no' ---\nframeborder='no' src='https://w.soundcloud.com/player/---\n?url='\" + url +\"></iframe>");
-      widget.attr('src', widget.attr('src') + url);
-      return $(this.box).append(widget);
+    SoundDrop.prototype.add = function(widget_code) {
+      var widget, xpos;
+      widget = $(widget_code);
+      widget.attr('width', '350px');
+      widget.attr('height', '100px');
+      widget.attr('class', 'target');
+      xpos = Math.floor(Math.random() * $('body').width() - 350);
+      widget.css('position', 'absolute');
+      widget.css('left', xpos);
+      $(this.box).append(widget);
+      return $(this.box).jGravity({
+        target: '.target:last-child'
+      });
     };
 
     return SoundDrop;

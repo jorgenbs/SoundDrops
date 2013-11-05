@@ -5,11 +5,12 @@ html
     script(src='http://localhost:1337/livereload.js')
   body
     div.box
-        h1.target hello there!
 
     script(src='js/lib/jquery.min.js')
     script(src='js/lib/jgravity.min.js')
     script(src='js/lib/soundcloud-widget-api.min.js')
     script(src='js/sound-drop.js')
     script(type='text/javascript')
-        new SoundDrop('.box')
+        $(document).ready(function () {
+            var sd = new SoundDrop('.box')
+        })
