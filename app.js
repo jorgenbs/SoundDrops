@@ -1,5 +1,5 @@
 (function() {
-  var app, express, http, jade, path, server;
+  var app, express, http, io, jade, path, server, socket;
 
   express = require('express');
 
@@ -8,6 +8,8 @@
   http = require('http');
 
   jade = require('jade');
+
+  socket = require('socket.io');
 
   app = express();
 
@@ -31,6 +33,14 @@
 
   server.listen('8080', function() {
     return console.log('server running');
+  });
+
+  io = socket.listen(80);
+
+  io.sockets.on('connection', function(socket) {
+    return socket.emit('news', {
+      hello: 'world'
+    });
   });
 
 }).call(this);

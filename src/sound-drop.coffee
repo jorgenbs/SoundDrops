@@ -13,7 +13,6 @@ class SoundDrop
 
     #random x-position
     xpos = Math.floor Math.random() * $('body').width() - 350
-
     widget.css('position', 'absolute')
     widget.css('left', xpos)
 

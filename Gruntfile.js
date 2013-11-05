@@ -45,7 +45,8 @@ module.exports = function(grunt) {
         files: {
           'app.js': 'src/app.coffee',
           'routes.js': 'src/routes.coffee',
-          'public/js/sound-drop.js': 'src/sound-drop.coffee'
+          'public/js/sound-drop.js': 'src/sound-drop.coffee',
+          'public/js/main.js': 'src/main-client.coffee'
         }
       }
     },
