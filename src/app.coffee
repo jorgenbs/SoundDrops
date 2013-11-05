@@ -13,7 +13,7 @@ app.use express.logger('dev')
 app.use express.favicon()
 
 #index
-app.get '/', (req, res) ->
+app.get '*', (req, res) ->
   res.render('index')
 
 #setup http server
@@ -22,8 +22,8 @@ server.listen '8080', () ->
   console.log 'server running'
 
 #setup websocket
-io = socket.listen 80
+io = socket.listen server
 
 io.sockets.on 'connection', (socket) ->
-  socket.emit 'news',
-    hello: 'world'
+  socket.on 'new_drop', (data) ->
+    socket.broadcast.emit 'new_drop', data

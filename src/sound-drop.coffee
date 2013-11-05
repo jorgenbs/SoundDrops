@@ -1,11 +1,14 @@
 class SoundDrop
-  constructor: (@box) ->
+  constructor: (@box, @socket) ->
     self = this
     $(@box).click ->
       widget_code = window.prompt 'pase widget code'
-      self.add(widget_code)
+      self.add widget_code, true
 
-  add: (widget_code) ->
+    @socket.on 'new_drop', (data) ->
+      self.add data.widget_code, false
+
+  add: (widget_code, emit) ->
     widget = $(widget_code)
     widget.attr('width', '350px')
     widget.attr('height', '100px')
@@ -20,5 +23,9 @@ class SoundDrop
     $(@box).jGravity(
       target: '.target:last-child'
     )
+
+    if emit
+      @socket.emit 'new_drop',
+        widget_code: widget_code
 
 this.SoundDrop = SoundDrop

@@ -25,7 +25,7 @@
 
   app.use(express.favicon());
 
-  app.get('/', function(req, res) {
+  app.get('*', function(req, res) {
     return res.render('index');
   });
 
@@ -35,11 +35,11 @@
     return console.log('server running');
   });
 
-  io = socket.listen(80);
+  io = socket.listen(server);
 
   io.sockets.on('connection', function(socket) {
-    return socket.emit('news', {
-      hello: 'world'
+    return socket.on('new_drop', function(data) {
+      return socket.broadcast.emit('new_drop', data);
     });
   });
 
