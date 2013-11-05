@@ -1,5 +1,5 @@
 (function() {
-  var app, express, http, io, jade, path, server, socket;
+  var app, express, http, io, jade, path, room, server, socket;
 
   express = require('express');
 
@@ -25,7 +25,10 @@
 
   app.use(express.favicon());
 
+  room = '/';
+
   app.get('*', function(req, res) {
+    room = req.url;
     return res.render('index');
   });
 
@@ -37,9 +40,12 @@
 
   io = socket.listen(server);
 
+  console.log(room);
+
   io.sockets.on('connection', function(socket) {
+    socket.join(room);
     return socket.on('new_drop', function(data) {
-      return socket.broadcast.emit('new_drop', data);
+      return socket.broadcast.to(room).emit('new_drop', data);
     });
   });
 

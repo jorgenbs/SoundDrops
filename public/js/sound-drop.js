@@ -3,17 +3,16 @@
 
   SoundDrop = (function() {
     function SoundDrop(box, socket) {
-      var self;
+      var _this = this;
       this.box = box;
       this.socket = socket;
-      self = this;
       $(this.box).click(function() {
         var widget_code;
         widget_code = window.prompt('pase widget code');
-        return self.add(widget_code, true);
+        return _this.add(widget_code, true);
       });
       this.socket.on('new_drop', function(data) {
-        return self.add(data.widget_code, false);
+        return _this.add(data.widget_code, false);
       });
     }
 

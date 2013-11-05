@@ -11,9 +11,11 @@ app.use(express.static(path.join __dirname, 'public' ))
 app.use app.router
 app.use express.logger('dev')
 app.use express.favicon()
+room = '/'
 
 #index
 app.get '*', (req, res) ->
+  room = req.url
   res.render('index')
 
 #setup http server
@@ -24,6 +26,9 @@ server.listen '8080', () ->
 #setup websocket
 io = socket.listen server
 
+console.log room
+
 io.sockets.on 'connection', (socket) ->
+  socket.join room
   socket.on 'new_drop', (data) ->
-    socket.broadcast.emit 'new_drop', data
+    socket.broadcast.to(room).emit 'new_drop', data

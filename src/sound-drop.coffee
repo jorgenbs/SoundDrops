@@ -1,12 +1,12 @@
 class SoundDrop
   constructor: (@box, @socket) ->
-    self = this
-    $(@box).click ->
-      widget_code = window.prompt 'pase widget code'
-      self.add widget_code, true
 
-    @socket.on 'new_drop', (data) ->
-      self.add data.widget_code, false
+    $(@box).click =>
+      widget_code = window.prompt 'pase widget code'
+      @add widget_code, true
+
+    @socket.on 'new_drop', (data) =>
+      @add data.widget_code, false
 
   add: (widget_code, emit) ->
     widget = $(widget_code)
