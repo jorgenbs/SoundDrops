@@ -51,7 +51,12 @@ module.exports = function(grunt) {
       }
     },
     coffeelint: {
-      all: ['src/**/*.coffee', 'test/**/*.coffee']
+      all: ['src/**/*.coffee', 'test/**/*.coffee'],
+      options: {
+        'max_line_length': {
+          'level': 'warn'
+        }
+      }
     }
   });
 
