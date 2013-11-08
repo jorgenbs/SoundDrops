@@ -12,58 +12,61 @@
       this.canvas = canvas;
       this.wander = new Wander();
       this.collision = new Collision();
+      this.playAttraction = new Attraction();
+      this.playRepulsion = new Attraction();
+      this.playAttraction.setRadius(1200);
+      this.playRepulsion.setRadius(20);
+      this.playAttraction.strength = 0;
+      this.playRepulsion.strength = 0;
       min = new Vector(0.0, 0.0);
       max = new Vector(window.innerWidth, window.innerHeight);
       this.edge = new EdgeBounce(min, max);
+      this.COLOURS = ['DC0048', 'F14646', '4AE6A9', '7CFF3F', '4EC9D9', 'E4272E'];
       if ((this.box != null) && (this.socket != null)) {
         this.socket.on('new_drop', function(data) {
           return _this.add(data.widget_code, false);
         });
       }
-      canvas.mouseup = function() {
-        var delta, m, p, r, _i, _len, _ref, _results;
-        m = new Vector(canvas.mouse.x, canvas.mouse.y);
-        delta = new Vector();
-        _ref = physics.particles;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          p = _ref[_i];
-          (delta.copy(m)).sub(p.pos);
-          r = p.radius;
-          if (abs(delta.x) <= r && abs(delta.y) <= r) {
-            _results.push(_this.playSound(p));
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      };
     }
 
-    SoundDrop.prototype.add = function(widget_code, emit) {
-      var widget, widget_api;
-      widget_code = "<iframe width=\"100%\" height=\"166\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/118763851\"></iframe>";
-      if (emit) {
-        this.socket.emit('new_drop', {
-          widget_code: widget_code
-        });
-      }
-      widget = this._addIframe(widget_code);
-      widget_api = SC.Widget(widget[0]);
-      widget.hide();
-      return this._addReplacementWidget(widget_api);
+    SoundDrop.prototype.add = function(track, emit) {
+      var _this = this;
+      return SC.stream(track, function(sound) {
+        return _this._addParticle(sound);
+      });
     };
 
     SoundDrop.prototype.playSound = function(particle) {
-      var sd;
-      sd = particle.sounddrop;
-      sd.toggle();
-      if (!sd.isPaused()) {
-        return this._setAlphaParticle(particle);
+      var oldAlpha;
+      if (this.alpha === particle) {
+        this.alpha.sounddrops.sound.pause();
+        this.playAttraction.strength = 0.0;
+        this.playRepulsion.strength = 0.0;
+      } else {
+        oldAlpha = this.alpha;
+        this.alpha = particle;
+        this.alpha.sounddrops.sound.play();
+        if (oldAlpha != null) {
+          oldAlpha.sounddrops.sound.pause();
+          oldAlpha.behaviours.push(this.playAttraction);
+          oldAlpha.behaviours.push(this.playRepulsion);
+        }
+        this.playAttraction.strength = 120.0;
+        this.playRepulsion.strength = -1000.0;
       }
+      return this.alpha.behaviours = _.without(this.alpha.behaviours, [this.playAttraction, this.playRepulsion]);
     };
 
-    SoundDrop.prototype._setAlphaParticle = function(particle) {};
+    SoundDrop.prototype.step = function() {
+      if ((this.alpha != null) && this.alpha.sounddrops.sound.playState === 1) {
+        this.alpha.colour = Random.item(this.COLOURS);
+        this.playAttraction.target.x = this.alpha.pos.x;
+        this.playAttraction.target.y = this.alpha.pos.y;
+        this.playRepulsion.target.x = this.alpha.pos.x;
+        this.playRepulsion.target.y = this.alpha.pos.y;
+      }
+      return this.physics.step();
+    };
 
     SoundDrop.prototype._addIframe = function(widget_code) {
       var widget;
@@ -72,15 +75,19 @@
       return widget;
     };
 
-    SoundDrop.prototype._addReplacementWidget = function(widget_api) {
+    SoundDrop.prototype._addParticle = function(sound) {
       var particle, position;
-      particle = new Particle(Math.random());
-      position = new Vector(random(this.width), random(this.height));
+      particle = new Particle(1);
+      position = new Vector(random(window.innerWidth), random(window.innerHeight));
       particle.moveTo(position);
-      particle.setRadius(50);
-      particle.sounddrop = widget_api;
-      particle.behaviours.push(this.wander);
+      particle.setRadius(35);
+      particle.colour = Random.item(this.COLOURS);
+      particle.sounddrops = {
+        sound: sound
+      };
       particle.behaviours.push(this.edge);
+      particle.behaviours.push(this.playAttraction);
+      particle.behaviours.push(this.playRepulsion);
       return this.physics.particles.push(particle);
     };
 
