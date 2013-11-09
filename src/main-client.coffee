@@ -18,7 +18,7 @@ $(document).ready () =>
       (delta.copy m).sub p.pos
       r = p.radius
       # Check if particles collide.
-      SD.playSound(p) if abs(delta.x) <= r and abs(delta.y) <= r
+      return SD.playSound(p) if abs(delta.x) <= r and abs(delta.y) <= r
 
   canvas.draw = () ->
     SD.step()

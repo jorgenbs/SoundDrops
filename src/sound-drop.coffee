@@ -3,11 +3,15 @@ class SoundDrop
   constructor: (@box, @socket, @physics, @canvas) ->
     @wander = new Wander()
     @collision = new Collision()
+    @center = new Attraction()
+    @center.target.x = window.innerWidth/2
+    @center.target.y = window.innerHeight/2
+    @center.strength = 700
     
     @playAttraction = new Attraction()
     @playRepulsion = new Attraction()
     @playAttraction.setRadius 1200
-    @playRepulsion.setRadius 20
+    @playRepulsion.setRadius 185
     @playAttraction.strength = 0
     @playRepulsion.strength = 0
     
@@ -30,9 +34,7 @@ class SoundDrop
   playSound: (particle) ->
     if @alpha is particle
       #pause
-      @alpha.sounddrops.sound.pause()
-      @playAttraction.strength = 0.0
-      @playRepulsion.strength = 0.0
+      @alpha.sounddrops.sound.togglePause()
     else
       #play
       oldAlpha = @alpha
@@ -46,8 +48,17 @@ class SoundDrop
         oldAlpha.behaviours.push @playAttraction
         oldAlpha.behaviours.push @playRepulsion
 
+    sound = @alpha.sounddrops.sound
+    
+    if sound.playState is 0 or sound.paused is true
+      @playAttraction.strength = 0.0
+      @playRepulsion.strength = 0.0
+      @alpha.behaviours = _.without(@alpha.behaviours, @center)
+    else
+      #TURN UP DA BASS
       @playAttraction.strength = 120.0
-      @playRepulsion.strength = -1000.0
+      @playRepulsion.strength = -2000.0
+      @alpha.behaviours.push @center
 
     #remove attraction from alpha particle
     @alpha.behaviours = _.without(@alpha.behaviours, [@playAttraction, @playRepulsion])
@@ -62,10 +73,6 @@ class SoundDrop
 
     @physics.step()
 
-  _addIframe: (widget_code) ->
-    widget = $(widget_code)
-    $(@box).append(widget)
-    return widget
 
   _addParticle: (sound) ->
     particle = new Particle 1
@@ -76,11 +83,12 @@ class SoundDrop
     particle.sounddrops = { sound: sound }
 
     #register
+    @collision.pool.push particle
     #particle.behaviours.push @wander
     particle.behaviours.push @edge
     particle.behaviours.push @playAttraction
     particle.behaviours.push @playRepulsion
-    #particle.behaviours.push @collision
+    particle.behaviours.push @collision
 
     @physics.particles.push particle
 

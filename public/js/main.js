@@ -15,22 +15,18 @@
     });
     _this.SD = new SoundDrop('canvas', socket, physics, canvas);
     canvas.mouseup = function() {
-      var delta, m, p, r, _i, _len, _ref, _results;
+      var delta, m, p, r, _i, _len, _ref;
       m = new Vector(canvas.mouse.x, canvas.mouse.y);
       delta = new Vector();
       _ref = physics.particles;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         p = _ref[_i];
         (delta.copy(m)).sub(p.pos);
         r = p.radius;
         if (abs(delta.x) <= r && abs(delta.y) <= r) {
-          _results.push(SD.playSound(p));
-        } else {
-          _results.push(void 0);
+          return SD.playSound(p);
         }
       }
-      return _results;
     };
     return canvas.draw = function() {
       var particle, _i, _len, _ref, _results;

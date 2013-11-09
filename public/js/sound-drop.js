@@ -12,10 +12,14 @@
       this.canvas = canvas;
       this.wander = new Wander();
       this.collision = new Collision();
+      this.center = new Attraction();
+      this.center.target.x = window.innerWidth / 2;
+      this.center.target.y = window.innerHeight / 2;
+      this.center.strength = 700;
       this.playAttraction = new Attraction();
       this.playRepulsion = new Attraction();
       this.playAttraction.setRadius(1200);
-      this.playRepulsion.setRadius(20);
+      this.playRepulsion.setRadius(185);
       this.playAttraction.strength = 0;
       this.playRepulsion.strength = 0;
       min = new Vector(0.0, 0.0);
@@ -37,11 +41,9 @@
     };
 
     SoundDrop.prototype.playSound = function(particle) {
-      var oldAlpha;
+      var oldAlpha, sound;
       if (this.alpha === particle) {
-        this.alpha.sounddrops.sound.pause();
-        this.playAttraction.strength = 0.0;
-        this.playRepulsion.strength = 0.0;
+        this.alpha.sounddrops.sound.togglePause();
       } else {
         oldAlpha = this.alpha;
         this.alpha = particle;
@@ -51,8 +53,16 @@
           oldAlpha.behaviours.push(this.playAttraction);
           oldAlpha.behaviours.push(this.playRepulsion);
         }
+      }
+      sound = this.alpha.sounddrops.sound;
+      if (sound.playState === 0 || sound.paused === true) {
+        this.playAttraction.strength = 0.0;
+        this.playRepulsion.strength = 0.0;
+        this.alpha.behaviours = _.without(this.alpha.behaviours, this.center);
+      } else {
         this.playAttraction.strength = 120.0;
-        this.playRepulsion.strength = -1000.0;
+        this.playRepulsion.strength = -2000.0;
+        this.alpha.behaviours.push(this.center);
       }
       return this.alpha.behaviours = _.without(this.alpha.behaviours, [this.playAttraction, this.playRepulsion]);
     };
@@ -68,13 +78,6 @@
       return this.physics.step();
     };
 
-    SoundDrop.prototype._addIframe = function(widget_code) {
-      var widget;
-      widget = $(widget_code);
-      $(this.box).append(widget);
-      return widget;
-    };
-
     SoundDrop.prototype._addParticle = function(sound) {
       var particle, position;
       particle = new Particle(1);
@@ -85,9 +88,11 @@
       particle.sounddrops = {
         sound: sound
       };
+      this.collision.pool.push(particle);
       particle.behaviours.push(this.edge);
       particle.behaviours.push(this.playAttraction);
       particle.behaviours.push(this.playRepulsion);
+      particle.behaviours.push(this.collision);
       return this.physics.particles.push(particle);
     };
 
