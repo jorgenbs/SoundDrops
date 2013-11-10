@@ -38,6 +38,7 @@
         canvas.beginPath();
         canvas.fillStyle = particle.colour;
         canvas.arc(particle.pos.x, particle.pos.y, particle.radius, 0, Math.PI * 2);
+        canvas.fillRect(100, 500, 120, 500 * SD.peakData.left);
         _results.push(canvas.fill());
       }
       return _results;

@@ -1,11 +1,14 @@
 $(document).ready () =>
   'use strict'
+  
   socket = io.connect('http://localhost:8080')
+  
   SC.initialize
     client_id: '740f6d636f1113f90f3b442344099312'
 
   physics = new Physics()
   physics.integrator = new Verlet()
+  
   canvas = Sketch.create {container: document.body }
 
   this.SD = new SoundDrop 'canvas', socket, physics, canvas
@@ -27,4 +30,5 @@ $(document).ready () =>
       canvas.beginPath()
       canvas.fillStyle = particle.colour
       canvas.arc( particle.pos.x, particle.pos.y, particle.radius, 0, Math.PI * 2 )
+      canvas.fillRect( 100, 500, 120, 500 * SD.peakData.left )
       canvas.fill()

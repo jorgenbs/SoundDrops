@@ -26,12 +26,18 @@
       max = new Vector(window.innerWidth, window.innerHeight);
       this.edge = new EdgeBounce(min, max);
       this.COLOURS = ['DC0048', 'F14646', '4AE6A9', '7CFF3F', '4EC9D9', 'E4272E'];
+      this.alpha = null;
       if ((this.box != null) && (this.socket != null)) {
         this.socket.on('new_drop', function(data) {
           return _this.add(data.widget_code, false);
         });
       }
     }
+
+    SoundDrop.prototype.peakData = function() {
+      var _ref;
+      return (_ref = this.alpha) != null ? _ref.sounddrops.sound.peakData : void 0;
+    };
 
     SoundDrop.prototype.add = function(track, emit) {
       var _this = this;

@@ -21,10 +21,15 @@ class SoundDrop
     @edge = new EdgeBounce min, max
     @COLOURS = ['DC0048', 'F14646', '4AE6A9', '7CFF3F', '4EC9D9', 'E4272E']
 
+    @alpha = null
+
     if @box? and @socket?
       @socket.on 'new_drop', (data) =>
         @add data.widget_code, false
 
+  peakData: () ->
+    return @alpha?.sounddrops.sound.peakData
+  
   add: (track, emit) ->
     SC.stream track, (sound) =>
       @_addParticle sound
@@ -72,7 +77,6 @@ class SoundDrop
       @playRepulsion.target.y = @alpha.pos.y
 
     @physics.step()
-
 
   _addParticle: (sound) ->
     particle = new Particle 1
