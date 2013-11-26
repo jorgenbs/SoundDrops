@@ -13,7 +13,11 @@
     canvas = Sketch.create({
       container: document.body
     });
-    _this.SD = new SoundDrop('canvas', socket, physics, canvas);
+    _this.SD = new SoundDrop('canvas', socket, physics);
+    _this.SD.add('/tracks/119076886');
+    _this.SD.add('/tracks/119076886');
+    _this.SD.add('/tracks/119076886');
+    _this.SD.add('/tracks/119076886');
     canvas.mouseup = function() {
       var delta, m, p, r, _i, _len, _ref;
       m = new Vector(canvas.mouse.x, canvas.mouse.y);

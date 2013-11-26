@@ -3,19 +3,18 @@
   var SoundDrop;
 
   SoundDrop = (function() {
-    function SoundDrop(box, socket, physics, canvas) {
+    function SoundDrop(box, socket, physics) {
       var max, min,
         _this = this;
       this.box = box;
       this.socket = socket;
       this.physics = physics;
-      this.canvas = canvas;
       this.wander = new Wander();
       this.collision = new Collision();
       this.center = new Attraction();
       this.center.target.x = window.innerWidth / 2;
       this.center.target.y = window.innerHeight / 2;
-      this.center.strength = 700;
+      this.center.strength = 2000;
       this.playAttraction = new Attraction();
       this.playRepulsion = new Attraction();
       this.playAttraction.setRadius(1200);
@@ -26,7 +25,7 @@
       max = new Vector(window.innerWidth, window.innerHeight);
       this.edge = new EdgeBounce(min, max);
       this.COLOURS = ['DC0048', 'F14646', '4AE6A9', '7CFF3F', '4EC9D9', 'E4272E'];
-      this.alpha = null;
+      this.SoundManager = new SoundManager();
       if ((this.box != null) && (this.socket != null)) {
         this.socket.on('new_drop', function(data) {
           return _this.add(data.widget_code, false);
@@ -36,7 +35,7 @@
 
     SoundDrop.prototype.peakData = function() {
       var _ref;
-      return (_ref = this.alpha) != null ? _ref.sounddrops.sound.peakData : void 0;
+      return (_ref = this.SoundManager.playing) != null ? _ref.peakData : void 0;
     };
 
     SoundDrop.prototype.add = function(track, emit) {
@@ -47,41 +46,44 @@
     };
 
     SoundDrop.prototype.playSound = function(particle) {
-      var oldAlpha, sound;
-      if (this.alpha === particle) {
-        this.alpha.sounddrops.sound.togglePause();
-      } else {
-        oldAlpha = this.alpha;
-        this.alpha = particle;
-        this.alpha.sounddrops.sound.play();
-        if (oldAlpha != null) {
-          oldAlpha.sounddrops.sound.pause();
-          oldAlpha.behaviours.push(this.playAttraction);
-          oldAlpha.behaviours.push(this.playRepulsion);
-        }
+      var current, oldSound, _ref;
+      oldSound = (_ref = this.SoundManager.playSound(particle)) != null ? _ref.particle : void 0;
+      if (oldSound != null) {
+        oldSound.behaviours.push(this.playAttraction);
+        oldSound.behaviours.push(this.playRepulsion);
       }
-      sound = this.alpha.sounddrops.sound;
-      if (sound.playState === 0 || sound.paused === true) {
-        this.playAttraction.strength = 0.0;
-        this.playRepulsion.strength = 0.0;
-        this.alpha.behaviours = _.without(this.alpha.behaviours, this.center);
-      } else {
-        this.playAttraction.strength = 120.0;
-        this.playRepulsion.strength = -2000.0;
-        this.alpha.behaviours.push(this.center);
+      if (this.SoundManager.isPlaying()) {
+        current = this.SoundManager.getPlayingParticle();
+        current.behaviours = _.without(current.behaviours, [this.playAttraction, this.playRepulsion]);
       }
-      return this.alpha.behaviours = _.without(this.alpha.behaviours, [this.playAttraction, this.playRepulsion]);
+      return this._setFieldStrengths();
     };
 
     SoundDrop.prototype.step = function() {
-      if ((this.alpha != null) && this.alpha.sounddrops.sound.playState === 1) {
-        this.alpha.colour = Random.item(this.COLOURS);
-        this.playAttraction.target.x = this.alpha.pos.x;
-        this.playAttraction.target.y = this.alpha.pos.y;
-        this.playRepulsion.target.x = this.alpha.pos.x;
-        this.playRepulsion.target.y = this.alpha.pos.y;
+      var playing;
+      if (this.SoundManager.isPlaying()) {
+        playing = this.SoundManager.getPlayingParticle();
+        playing.colour = Random.item(this.COLOURS);
+        this.playAttraction.target.x = playing.pos.x;
+        this.playAttraction.target.y = playing.pos.y;
+        this.playRepulsion.target.x = playing.pos.x;
+        this.playRepulsion.target.y = playing.pos.y;
       }
       return this.physics.step();
+    };
+
+    SoundDrop.prototype._setFieldStrengths = function() {
+      var particle, _ref;
+      if (this.SoundManager.isPlaying()) {
+        this.playAttraction.strength = 0.0;
+        this.playRepulsion.strength = 0.0;
+        return (_ref = this.SoundManager.getPlayingParticle()) != null ? _ref.behaviours.push(this.center) : void 0;
+      } else {
+        this.playAttraction.strength = 120.0;
+        this.playRepulsion.strength = -2000.0;
+        particle = this.SoundManager.getPlayingParticle();
+        return particle != null ? particle.behaviours = _.without(particle.behaviours, this.center) : void 0;
+      }
     };
 
     SoundDrop.prototype._addParticle = function(sound) {
@@ -99,7 +101,14 @@
       particle.behaviours.push(this.playAttraction);
       particle.behaviours.push(this.playRepulsion);
       particle.behaviours.push(this.collision);
-      return this.physics.particles.push(particle);
+      this.physics.particles.push(particle);
+      return this.SoundManager.addSong(sound, particle);
+    };
+
+    SoundDrop.prototype._getParticle = function(id) {
+      return _.first(_.where(physics.particles, {
+        id: id
+      })) != null;
     };
 
     SoundDrop.prototype._randx = function(el) {
@@ -116,5 +125,69 @@
   })();
 
   this.SoundDrop = SoundDrop;
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var SoundManager;
+
+  SoundManager = (function() {
+    function SoundManager() {
+      this.pool = [];
+      this.playing = null;
+    }
+
+    SoundManager.prototype.addSong = function(sound, particle) {
+      return this.pool.push({
+        particle: particle,
+        sound: sound
+      });
+    };
+
+    SoundManager.prototype.findSound = function(particle) {
+      return _.first(_.where(this.pool, {
+        particle: particle
+      }));
+    };
+
+    SoundManager.prototype.playSound = function(particle) {
+      var old, sound, _ref;
+      sound = (_ref = this.findSound(particle)) != null ? _ref.sound : void 0;
+      if (sound === this.playing) {
+        sound.togglePause();
+      } else if (sound != null) {
+        old = this.pauseCurrent();
+        sound.play();
+        this.playing = sound;
+      }
+      return old;
+    };
+
+    SoundManager.prototype.getPlayingParticle = function() {
+      var _ref;
+      return (_ref = _.first(_.where(this.pool, {
+        sound: this.playing
+      }))) != null ? _ref.particle : void 0;
+    };
+
+    SoundManager.prototype.pauseCurrent = function() {
+      var _ref;
+      if ((_ref = this.playing) != null) {
+        _ref.pause();
+      }
+      return this.playing;
+    };
+
+    SoundManager.prototype.isPlaying = function() {
+      var _ref, _ref1;
+      return ((_ref = this.playing) != null ? _ref.paused : void 0) === false && ((_ref1 = this.playing) != null ? _ref1.playState : void 0) === 1;
+    };
+
+    return SoundManager;
+
+  })();
+
+  return this.SoundManager = SoundManager;
 
 }).call(this);

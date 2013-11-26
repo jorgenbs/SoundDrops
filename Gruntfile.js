@@ -45,7 +45,7 @@ module.exports = function(grunt) {
         files: {
           'app.js': 'src/app.coffee',
           'routes.js': 'src/routes.coffee',
-          'public/js/sound-drop.js': 'src/sound-drop.coffee',
+          'public/js/sound-drop.js': ['src/sound-drop.coffee', 'src/sound-manager.coffee'],
           'public/js/main.js': 'src/main-client.coffee'
         }
       }
@@ -73,6 +73,6 @@ module.exports = function(grunt) {
   // Default task.
   grunt.registerTask('default', ['coffeelint', 'coffee', 'mochaTest']);
   grunt.registerTask('test', ['mochaTest']);
-  grunt.registerTask('dev', ['default', 'concurrent']);
+  grunt.registerTask('dev', ['concurrent']);
 
 };
