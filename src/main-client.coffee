@@ -11,8 +11,12 @@ $(document).ready () =>
   
   canvas = Sketch.create {container: document.body }
 
-  this.SD = new SoundDrop 'canvas', socket, physics, canvas
-
+  this.SD = new SoundDrop 'canvas', socket, physics
+  this.SD.add('/tracks/119076886')
+  this.SD.add('/tracks/119076886')
+  this.SD.add('/tracks/119076886')
+  this.SD.add('/tracks/119076886')
+  
   canvas.mouseup = () =>
     m = new Vector canvas.mouse.x, canvas.mouse.y
     delta = new Vector()
